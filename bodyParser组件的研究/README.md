@@ -20,4 +20,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 - `text/xml` 提交xml格式的数据
 
 ## 详细解读 urlencoded
-express应用生成器默认配置了 `{extended: false}`，这个属性在官方的文档中的介绍是这样的：
+urlencoded模块用于解析req.body的数据，解析成功后覆盖原来的req.body，如果解析失败则为 `{}`。该模块有一个属性extended，官方介绍如下：
+
+The extended option allows to choose between parsing the URL-encoded data with the querystring library (when false) or the qs library (when true). Defaults to true, but using the default has been deprecated.
+
+大致的意思就是：extended选项允许配置使用querystring(false)或qs(true)来解析数据，默认值是true，但这已经是不被赞成的了。
+
+querystring就是nodejs内建的对象之一，用来字符串化对象或解析字符串。如
+```javascript
+querystring.parse("name=henry&age=30") => { name: 'henry', age: '30' }
+```
+那么，既然他已经能完成对urlencode的解析了，为什么还需要qs？qs又是什么？
