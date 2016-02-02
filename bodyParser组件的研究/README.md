@@ -1,17 +1,36 @@
 # bodyParser组件的研究
-> 接触nodejs已有一段时间了，但最近才开始落实项目，于是使用express应用生成器生成了一个应用，在开发中发现，ajax提交的数据无法被express正确的解析，莫名其妙的一个坑，困了我许久。
+接触nodejs已有一段时间了，但最近才开始落实项目，于是使用express应用生成器生成了一个应用，在开发中发现，ajax提交的数据无法被express正确的解析，主要的情况是这样的：
+```javascript
+// 浏览器端post一个对象
+$.ajax({
+    url: "/save",
+    type: "post",
+    data: {
+        name: "henry",
+        age: 30
+    },
+    hobby: [ "sport", "coding" ]
+});
+
+// express接收这个对象
+router.post("/save", function (req, res, next) {
+    console.log(req.body); // => { 'info[name]': 'henry','info[age]': '30','hobby[1]': 'sport','hobby[2]': 'coding' }
+});
+```
+显然这样的解析结果是不能直接拿来用的，莫名其妙的一个坑，困了我许久。
 
 
+## bodyParser中间件
 bodyParser中间件用来解析http请求体，是express默认使用的中间件之一。
 
 
-使用express应用生成器生成一个网站，发现它默认已经开启了json与urlencoded的解析功能，除了这两个，bodyParser还支持对text、raw的解析。
+使用express应用生成器生成一个网站，它默认已经使用了 `bodyParser.json` 与 `bodyParser.urlencoded` 的解析功能，除了这两个，bodyParser还支持对text、raw的解析。
 ```javascript
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 ```
 
-顾名思义，json是用来解析json数据格式的。urlencoded则是用来解析我们通常的form表单提交的数据，也就是请求头中的描述为： `Content-Type: application/x-www-form-urlencoded`
+顾名思义，json是用来解析json数据格式的。urlencoded则是用来解析我们通常的form表单提交的数据，也就是请求头中包含这样的信息： `Content-Type: application/x-www-form-urlencoded`
 
 ## 常见的四种Content-Type类型
 - `application/x-www-form-urlencoded` 常见的form提交
@@ -31,3 +50,27 @@ querystring就是nodejs内建的对象之一，用来字符串化对象或解析
 querystring.parse("name=henry&age=30") => { name: 'henry', age: '30' }
 ```
 那么，既然他已经能完成对urlencode的解析了，为什么还需要qs？qs又是什么？
+
+## qs介绍
+qs是一个querystring的库，在qs的功能基础上，还支持更多的功能并优化了一些安全性。比如，对象的支持：
+```javascript
+// 内建对象 querystring
+querystring.parse("info[name]=henry&info[age]=30&hobby[1]=sport&hobby[2]=coding") => 
+  { 
+    'info[name]': 'henry',
+    'info[age]': '30',
+    'hobby[1]': 'sport',
+    'hobby[2]': 'coding'
+  }
+
+// 第三方插件 qs
+qs.parse("info[name]=henry&info[age]=30&hobby[1]=sport&hobby[2]=coding") => 
+  {
+    info: {
+      name: 'henry',
+      age: '30'
+    },
+    hobby: [ 'sport', 'coding' ]
+  }
+```
+可以看出，querystring并不能正确的解析复杂对象（多级嵌套），而qs却可以做到。
