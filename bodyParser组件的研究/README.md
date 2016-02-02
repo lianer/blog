@@ -32,14 +32,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 顾名思义，json是用来解析json数据格式的。urlencoded则是用来解析我们通常的form表单提交的数据，也就是请求头中包含这样的信息： `Content-Type: application/x-www-form-urlencoded`
 
-## 常见的四种Content-Type类型
+**常见的四种Content-Type类型：**
+
 - `application/x-www-form-urlencoded` 常见的form提交
 - `multipart/form-data` 文件提交
 - `application/json` 提交json格式的数据
 - `text/xml` 提交xml格式的数据
 
 ## 详细解读 urlencoded
-urlencoded模块用于解析req.body的数据，解析成功后覆盖原来的req.body，如果解析失败则为 `{}`。该模块有一个属性extended，官方介绍如下：
+`bodyParser.urlencoded` 模块用于解析req.body的数据，解析成功后覆盖原来的req.body，如果解析失败则为 `{}`。该模块有一个属性extended，官方介绍如下：
 
 The extended option allows to choose between parsing the URL-encoded data with the querystring library (when false) or the qs library (when true). Defaults to true, but using the default has been deprecated.
 
